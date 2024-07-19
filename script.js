@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Forum Rules
+// @name         FreestylersWorld V8 Script
 // @namespace    FreestylersWorld
 // @version      v1.0.1
 // @description  Additional forum functionalities.
