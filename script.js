@@ -7,6 +7,8 @@
 // @match        https://freestylersworld.com/*
 // @icon         https://freestylersworld.com/favicon.ico
 // @grant        none
+// @downloadURL  https://raw.githubusercontent.com/AquaRush/freestylersworld/main/script.js
+// @updateURL    https://raw.githubusercontent.com/AquaRush/freestylersworld/main/script.js
 // ==/UserScript==
 
 (function() {
