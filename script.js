@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FreestylersWorld V8 Script
 // @namespace    FreestylersWorld
-// @version      v1.0.1
+// @version      v1.0.2
 // @description  Additional forum functionalities.
 // @author       GeorgeGFX
 // @match        https://freestylersworld.com/*
@@ -289,6 +289,42 @@
         span.style.position = 'relative';
         span.style.color = 'rgba(238,187,29,1)!important';
         span.style.textShadow = '2px 0px 6px rgba(238,187,29,1)';
+    });
+
+    // Show the full title of new threads instead of truncating them
+    window.addEventListener('load', function() {
+        // Select all <tr> elements that contain the thread details
+        const threadRows = document.querySelectorAll('tr[valign="top"]');
+
+        threadRows.forEach(row => {
+            // Find the <td> elements within the <tr>
+            const tdElements = row.querySelectorAll('td');
+
+            // Assuming the thread title <td> is the second one
+            const threadTitleTd = tdElements[1];
+
+            // Find the <a> tag within the thread title <td>
+            const threadLink = threadTitleTd.querySelector('a');
+
+            if (threadLink) {
+                // Get the full title from the <td>'s title attribute
+                const fullTitle = threadTitleTd.title;
+
+                // Set the text content of the <a> tag to the full title
+                threadLink.textContent = fullTitle;
+
+                // Optionally, set the title attribute to the full title for accessibility
+                threadLink.setAttribute('title', fullTitle);
+            }
+
+            // Find the "Posted By" <td>
+            const postedByTd = tdElements[2];
+
+            // Find the "Date/Time" <td>
+            const dateTimeTd = tdElements[3];
+
+            // No changes needed for "Posted By" and "Date/Time" elements
+        });
     });
 
 
