@@ -327,5 +327,46 @@
         });
     });
 
+    // Get the wgo_birthdays div
+    const birthdaysDiv = document.getElementById('wgo_birthdays');
+
+    // Get all the anchor tags inside the wgo_birthdays div
+    const memberLinks = birthdaysDiv.getElementsByTagName('a');
+
+    // Create the birthday icon element for users whose birthday is today
+    const birthdayIcon = document.createElement('img');
+    birthdayIcon.src = 'https://i.ibb.co/wYgYscB/happy-birthday.png';
+    birthdayIcon.alt = 'Birthday Icon';
+    birthdayIcon.width = 128; // Set width
+    birthdayIcon.height = 128; // Set height
+    birthdayIcon.style.paddingBottom = '20px'; // Add 20px bottom padding
+
+    // Create the unicorn image element for the background
+    const unicornIcon = document.createElement('img');
+    unicornIcon.src = 'https://i.ibb.co/4PFw9gt/unicorn.png';
+    unicornIcon.alt = 'Unicorn Icon';
+    unicornIcon.width = 32; // Set width for the unicorn icon
+    unicornIcon.height = 32; // Set height for the unicorn icon
+
+    // Convert HTMLCollection to an array to avoid live collection issues
+    const memberLinksArray = Array.from(memberLinks);
+
+    // Create a container for the birthday icon
+    const birthdayContainer = document.createElement('div');
+    birthdayContainer.style.textAlign = 'center'; // Center the container's content
+
+    // Append the birthday icon to the container
+    birthdayContainer.appendChild(birthdayIcon);
+
+    // Insert the birthday container at the top of the birthdaysDiv
+    birthdaysDiv.insertBefore(birthdayContainer, birthdaysDiv.firstChild);
+
+    // Loop through each anchor tag and insert the unicorn icon before it
+    memberLinksArray.forEach(link => {
+        // Clone and append the unicorn icon before the link
+        const unicornClone = unicornIcon.cloneNode(true);
+        link.parentNode.insertBefore(unicornClone, link);
+    });
+
 
 })();
