@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FreestylersWorld V8 Script
 // @namespace    FreestylersWorld
-// @version      v1.2
+// @version      v1.3
 // @description  Additional forum functionalities.
 // @author       GeorgeGFX
 // @match        https://freestylersworld.com/*
@@ -13,6 +13,175 @@
 
 (function() {
     'use strict';
+
+
+    // Function to dynamically load the Twitch embed script
+    function loadTwitchEmbedScript(callback) {
+        if (!document.querySelector('script[src="https://embed.twitch.tv/embed/v1.js"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://embed.twitch.tv/embed/v1.js';
+            script.onload = callback;
+            document.head.appendChild(script);
+        } else {
+            callback();
+        }
+    }
+
+    // Function to create the Twitch embed player
+    function createTwitchPlayer(channelName) {
+        const sanitizedChannelName = channelName.replace(/[^a-zA-Z0-9_-]/g, '');
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '220px';
+        container.style.top = '330px';
+        container.style.display = 'inline-block';
+        container.style.zIndex = 1000; // Ensure it is on top of other elements
+
+        // Create a div for the Twitch embed player
+        const twitchDiv = document.createElement('div');
+        twitchDiv.id = `twitch-embed-${sanitizedChannelName}`;
+        twitchDiv.style.width = '512px';
+        twitchDiv.style.height = '720px';
+
+        // Create a close button
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = 'X';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '5px';
+        closeButton.style.right = '5px';
+        closeButton.style.fontSize = '14px';
+        closeButton.style.fontWeight = 'bold';
+        closeButton.style.border = 'none';
+        closeButton.style.backgroundColor = 'transparent';
+        closeButton.style.color = 'white';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.display = 'none'; // Initially hide the close button
+
+        // Create a button to open the chat in a new window
+        const chatButton = document.createElement('button');
+        chatButton.innerHTML = 'Open Chat';
+        chatButton.style.position = 'absolute';
+        chatButton.style.bottom = '45px'; // 20px above the previous position
+        chatButton.style.right = '5px';
+        chatButton.style.fontSize = '14px';
+        chatButton.style.fontWeight = 'bold';
+        chatButton.style.border = 'none';
+        chatButton.style.backgroundColor = 'transparent';
+        chatButton.style.color = 'white';
+        chatButton.style.cursor = 'pointer';
+        chatButton.style.display = 'none'; // Initially hide the chat button
+
+        // Add event listeners for mouse hover
+        container.addEventListener('mouseenter', () => {
+            closeButton.style.display = 'block'; // Show the close button on mouse enter
+            chatButton.style.display = 'block'; // Show the chat button on mouse enter
+        });
+
+        container.addEventListener('mouseleave', () => {
+            closeButton.style.display = 'none'; // Hide the close button on mouse leave
+            chatButton.style.display = 'none'; // Hide the chat button on mouse leave
+        });
+
+        // Close button functionality
+        closeButton.addEventListener('click', function() {
+            container.remove();
+        });
+
+        // Chat button functionality
+        chatButton.addEventListener('click', function() {
+            window.open(`https://www.twitch.tv/popout/${sanitizedChannelName}/chat?popout=`, '_blank', 'width=400,height=600');
+        });
+
+        // Append the Twitch div, close button, and chat button to the container
+        container.appendChild(twitchDiv);
+        container.appendChild(closeButton);
+        container.appendChild(chatButton);
+
+        // Append the container to the body
+        document.body.appendChild(container);
+
+        // Initialize the Twitch embed without chat
+        const embed = new Twitch.Embed(twitchDiv.id, {
+            width: 512,
+            height: 720,
+            channel: sanitizedChannelName,
+            parent: [window.location.hostname],
+            layout: 'video', // Show only video without chat
+        });
+
+        // Handle errors
+        embed.addEventListener(Twitch.Embed.VIDEO_READY, () => {
+            console.log('Twitch player ready:', sanitizedChannelName);
+        });
+
+        embed.addEventListener(Twitch.Embed.ERROR, (error) => {
+            console.error('Twitch player error:', error);
+        });
+
+        // Log iframe details for debugging
+        console.log('Created Twitch player embed:', sanitizedChannelName);
+    }
+
+    // Store the last time a request was made to avoid rate limiting
+    let lastRequestTime = 0;
+    const REQUEST_INTERVAL = 10000; // 10 seconds interval between requests
+
+    // Function to check for live Twitch streams in chat
+    function checkForLiveStreams() {
+        const currentTime = Date.now();
+        if (currentTime - lastRequestTime < REQUEST_INTERVAL) {
+            return; // Skip if the interval has not passed
+        }
+        lastRequestTime = currentTime;
+
+        const chatTable = document.getElementById('zmain');
+        if (!chatTable) {
+            console.error('Chat table not found');
+            return;
+        }
+
+        const chatRows = chatTable.getElementsByTagName('tr');
+        let lastTwitchLink = null;
+
+        for (let i = chatRows.length - 1; i >= 0; i--) { // Iterate from the last element to the first
+            const chatRow = chatRows[i];
+            const chatContent = chatRow.getElementsByClassName('chat')[0];
+            if (chatContent) {
+                const twitchLinkMatch = chatContent.innerHTML.match(/(https?:\/\/twitch\.tv\/[^\s"<]+)/);
+                if (twitchLinkMatch) {
+                    lastTwitchLink = twitchLinkMatch[0]; // Store the last Twitch link
+                    break; // Stop after finding the last Twitch link
+                }
+            }
+        }
+
+        // Remove all twitch.tv links from chat
+        for (let i = chatRows.length - 1; i >= 0; i--) {
+            const chatRow = chatRows[i];
+            const chatContent = chatRow.getElementsByClassName('chat')[0];
+            if (chatContent) {
+                chatContent.innerHTML = chatContent.innerHTML.replace(/https?:\/\/twitch\.tv\/[^\s"<]+/g, '');
+            }
+        }
+
+        // If a last Twitch link was found, create the player
+        if (lastTwitchLink) {
+            try {
+                const url = new URL(lastTwitchLink);
+                const channelName = url.pathname.slice(1);
+                createTwitchPlayer(channelName);
+            } catch (error) {
+                console.error('Invalid Twitch URL:', lastTwitchLink, error);
+            }
+        }
+    }
+
+    // Load the Twitch embed script and then start checking for live streams
+    loadTwitchEmbedScript(() => {
+        // Call the function to check for live streams every 10 seconds
+        setInterval(checkForLiveStreams, 10000);
+    });
+
 
 
     // Remove inline styling rule for signature height
@@ -367,6 +536,7 @@
         const unicornClone = unicornIcon.cloneNode(true);
         link.parentNode.insertBefore(unicornClone, link);
     });
+
 
 
 })();
