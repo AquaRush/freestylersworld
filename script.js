@@ -306,7 +306,7 @@
     // ZChat system message
     function sendWelcomeMessage() {
         const welcomeMessage = 'Welcome to the chat, if you need any type of support, please refer to <a href="https://freestylersworld.com/showthread.php?75134" target="_blank">this link</a>.';
-        const discordMessage = 'For additional support, please join our <a href="https://freestylersworld.com/showthread.php?75134" target="_blank">discord server</a> and create a support ticket.';
+        const discordMessage = 'For additional support, please join our <a href="https://discord.com/invite/d4Zjr4T9" target="_blank">discord server</a> and create a support ticket.';
         const isExeVirus = '<span style="color:#ff0021eb;">Please keep in mind that FGunZ has no viruses in the gunz.exe, if your anti-virus warns you of one, it is a false positive.</span>';
 
         const welcomeRow1 = document.createElement('tr');
