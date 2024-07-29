@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         FreestylersWorld V8 Script
 // @namespace    FreestylersWorld
-// @version      v1.3
+// @version      v1.4
 // @description  Additional forum functionalities.
 // @author       GeorgeGFX
 // @match        https://freestylersworld.com/*
